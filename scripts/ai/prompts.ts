@@ -8,13 +8,13 @@ export function buildDailyPrompt(groupedArticles: Record<string, Article[]>, dat
     for (const article of articles) {
       articleList += `- Title: ${article.title}\n`;
       articleList += `  URL: ${article.url}\n`;
-      articleList += `  Content: ${article.content.slice(0, 2000)}\n`;
+      articleList += `  Content: ${article.content.slice(0, 13000)}\n`;
       if (article.author) articleList += `  Author: ${article.author}\n`;
       articleList += '\n';
     }
   }
 
-  return `You are a professional tech news editor. Generate a bilingual (English and Chinese) daily news digest for ${date}.
+  return `You are a professional tech news editor. Generate a Chinese daily news digest for ${date}.
 
 Here are today's articles from various sources:
 
@@ -26,19 +26,18 @@ Please generate a well-structured Markdown news digest following these rules:
 2. For each article, provide:
    - The original English title
    - A Chinese translation of the title (Skip this line if the translation is identical to the English title, such as code repository names)
-   - A comprehensive English summary (1-2 substantial paragraphs, detailing the core features, facts, and context)
-   - A comprehensive Chinese summary (1-2 substantial paragraphs, adapting the English summary details naturally for Chinese readers)
+   - A comprehensive Chinese summary (1-2 substantial paragraphs, detailing the core features, facts, and context naturally for Chinese readers)
    - The original article link
 3. Summarize ALL provided articles (skip only exact duplicates). Even if an article only has a title and a score (like Hacker News), you MUST include it and write a brief summary based on its title. Do not aggressively filter them out.
-4. Add a brief "Today's Highlights / 今日要点" section at the top with 3-5 key takeaways in both languages
+4. Add a brief "今日要点" (Today's Highlights) section at the top with 3-5 key takeaways in Chinese only.
 
 Output format (Markdown only, no code fences):
 
-## Today's Highlights / 今日要点
+## 今日要点
 
-- English highlight 1 / 中文要点 1
-- English highlight 2 / 中文要点 2
-- English highlight 3 / 中文要点 3
+- [要点 1]
+- [要点 2]
+- [要点 3]
 
 ---
 
@@ -47,9 +46,7 @@ Output format (Markdown only, no code fences):
 ### Article Title
 ### 中文标题 (Omit this line entirely if identical to the Article Title)
 
-English summary paragraph.
-
-中文摘要段落。
+中文详细摘要段落。
 
 [Read more →](url)
 

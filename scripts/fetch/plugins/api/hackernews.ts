@@ -81,7 +81,7 @@ const hackernewsPlugin: SourcePlugin = {
                   .join('\n\n');
                   
                 if (textContent.length > 100) {
-                  article.content = textContent.slice(0, 4000); // Send first 4k chars to AI
+                  article.content = textContent.slice(0, 13000); // Send first 13k chars to AI
                 }
               }
             } catch (err) {

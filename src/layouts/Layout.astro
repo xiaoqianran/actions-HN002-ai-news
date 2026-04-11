@@ -14,6 +14,11 @@ const { title } = Astro.props;
     <meta name="description" content="AI-powered daily tech news digest in English and Chinese" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title}</title>
+    <script is:inline>
+      // Prevent FOUC: apply saved theme before paint
+      const t = localStorage.getItem('theme');
+      if (t) document.documentElement.dataset.theme = t;
+    </script>
   </head>
   <body>
     <!-- Reading progress bar -->
@@ -23,6 +28,7 @@ const { title } = Astro.props;
       <nav>
         <a href="/" class="logo">AI News Daily</a>
         <span class="tagline">AI 新闻日报</span>
+        <button class="theme-toggle" id="theme-toggle" aria-label="切换主题"></button>
       </nav>
     </header>
     <main>
@@ -38,6 +44,33 @@ const { title } = Astro.props;
     <button class="back-to-top" id="back-to-top" aria-label="回到顶部">↑</button>
 
     <script>
+      // Theme toggle: auto → light → dark → auto
+      const toggle = document.getElementById('theme-toggle');
+      const icons: Record<string, string> = { light: '☀', dark: '🌙', auto: '◐' };
+
+      function currentMode(): string {
+        return document.documentElement.dataset.theme || 'auto';
+      }
+
+      function updateToggle() {
+        if (toggle) toggle.textContent = icons[currentMode()] ?? icons.auto;
+      }
+
+      toggle?.addEventListener('click', () => {
+        const order = ['auto', 'light', 'dark'];
+        const next = order[(order.indexOf(currentMode()) + 1) % order.length];
+        if (next === 'auto') {
+          delete document.documentElement.dataset.theme;
+          localStorage.removeItem('theme');
+        } else {
+          document.documentElement.dataset.theme = next;
+          localStorage.setItem('theme', next);
+        }
+        updateToggle();
+      });
+
+      updateToggle();
+
       // Reading progress bar
       const progressBar = document.getElementById('progress-bar');
       const backToTop = document.getElementById('back-to-top');
@@ -72,6 +105,7 @@ const { title } = Astro.props;
 </html>
 
 <style is:global>
+  /* ========== Dark theme (default) ========== */
   :root {
     --color-bg: #0a0a0a;
     --color-surface: #141414;
@@ -82,6 +116,44 @@ const { title } = Astro.props;
     --color-accent-hover: #60a5fa;
     --color-card: #1a1a1a;
     --max-width: 800px;
+  }
+
+  /* ========== Light theme (system auto) ========== */
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --color-bg: #ffffff;
+      --color-surface: #f5f5f5;
+      --color-border: #e0e0e0;
+      --color-text: #1a1a1a;
+      --color-text-muted: #666666;
+      --color-accent: #2563eb;
+      --color-accent-hover: #1d4ed8;
+      --color-card: #f0f0f0;
+    }
+  }
+
+  /* ========== Light theme (manual override) ========== */
+  :root[data-theme="light"] {
+    --color-bg: #ffffff;
+    --color-surface: #f5f5f5;
+    --color-border: #e0e0e0;
+    --color-text: #1a1a1a;
+    --color-text-muted: #666666;
+    --color-accent: #2563eb;
+    --color-accent-hover: #1d4ed8;
+    --color-card: #f0f0f0;
+  }
+
+  /* ========== Dark theme (manual override) ========== */
+  :root[data-theme="dark"] {
+    --color-bg: #0a0a0a;
+    --color-surface: #141414;
+    --color-border: #262626;
+    --color-text: #e5e5e5;
+    --color-text-muted: #a3a3a3;
+    --color-accent: #3b82f6;
+    --color-accent-hover: #60a5fa;
+    --color-card: #1a1a1a;
   }
 
   * {
@@ -104,6 +176,7 @@ const { title } = Astro.props;
     display: flex;
     flex-direction: column;
     -webkit-text-size-adjust: 100%;
+    transition: background 0.2s, color 0.2s;
   }
 
   /* Progress bar */
@@ -148,6 +221,29 @@ const { title } = Astro.props;
     background: var(--color-accent);
     border-color: var(--color-accent);
     color: #fff;
+  }
+
+  /* Theme toggle */
+  .theme-toggle {
+    margin-left: auto;
+    background: none;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    color: var(--color-text-muted);
+    font-size: 1rem;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.2s, color 0.2s;
+    flex-shrink: 0;
+  }
+
+  .theme-toggle:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
   }
 
   header {

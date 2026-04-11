@@ -1,14 +1,20 @@
 import type { Article } from '../fetch/types.js';
 
+const GLOBAL_CHAR_BUDGET = 80_000; // ~20K tokens, safe for most models
+
 export function buildDailyPrompt(groupedArticles: Record<string, Article[]>, date: string): string {
+  const sources = Object.entries(groupedArticles);
+  const totalArticles = sources.reduce((sum, [, arts]) => sum + arts.length, 0);
+  const perArticleBudget = Math.floor(GLOBAL_CHAR_BUDGET / Math.max(totalArticles, 1));
+
   let articleList = '';
 
-  for (const [source, articles] of Object.entries(groupedArticles)) {
+  for (const [source, articles] of sources) {
     articleList += `\n## Source: ${source}\n`;
     for (const article of articles) {
       articleList += `- Title: ${article.title}\n`;
       articleList += `  URL: ${article.url}\n`;
-      articleList += `  Content: ${article.content.slice(0, 13000)}\n`;
+      articleList += `  Content: ${article.content.slice(0, perArticleBudget)}\n`;
       if (article.author) articleList += `  Author: ${article.author}\n`;
       articleList += '\n';
     }

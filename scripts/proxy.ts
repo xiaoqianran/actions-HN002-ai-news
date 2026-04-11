@@ -15,13 +15,7 @@ if (proxyUrl) {
   proxyAgent = new HttpsProxyAgent(proxyUrl);
 }
 
-/**
- * Fetch wrapper with automatic proxy support.
- * - No proxy configured → uses native fetch directly.
- * - Proxy configured → tries node-fetch with proxy agent,
- *   falls back to native fetch if that fails (for TLS-incompatible sites).
- */
-export async function proxyFetch(
+async function fetchOnce(
   url: string | URL | Request,
   init?: RequestInit,
 ): Promise<Response> {
@@ -37,9 +31,42 @@ export async function proxyFetch(
     });
     return res as unknown as Response;
   } catch (err) {
-    // Fallback to native fetch (without proxy) for sites where node-fetch + proxy fails
     const msg = err instanceof Error ? err.message : String(err);
     console.warn(`[proxy] node-fetch failed for ${url.toString().slice(0, 60)}..., fallback to native fetch: ${msg}`);
     return fetch(url, init);
   }
+}
+
+/**
+ * Fetch wrapper with automatic proxy support and retry.
+ */
+export async function proxyFetch(
+  url: string | URL | Request,
+  init?: RequestInit & { retries?: number },
+): Promise<Response> {
+  const maxRetries = init?.retries ?? 2;
+  let lastError: Error | undefined;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const res = await fetchOnce(url, init);
+      if (res.ok || attempt === maxRetries) return res;
+      // Retry on server errors (5xx)
+      if (res.status >= 500) {
+        lastError = new Error(`HTTP ${res.status}`);
+      } else {
+        return res; // Don't retry client errors (4xx)
+      }
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err));
+    }
+
+    if (attempt < maxRetries) {
+      const delay = 1000 * (attempt + 1);
+      console.warn(`[proxy] Retry ${attempt + 1}/${maxRetries} for ${url.toString().slice(0, 60)}... (waiting ${delay}ms)`);
+      await new Promise(r => setTimeout(r, delay));
+    }
+  }
+
+  throw lastError ?? new Error(`Failed to fetch ${url}`);
 }

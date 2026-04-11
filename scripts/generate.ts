@@ -9,11 +9,28 @@ function getDateString(date?: Date): string {
   return d.toISOString().split('T')[0];
 }
 
+function normalizeUrl(raw: string): string {
+  try {
+    const u = new URL(raw);
+    // Strip query/fragment, lowercase host, remove trailing slash
+    return `${u.protocol}//${u.host.toLowerCase()}${u.pathname.replace(/\/$/, '')}`;
+  } catch {
+    return raw.toLowerCase();
+  }
+}
+
 function groupBySource(results: FetchResult[]): Record<string, Article[]> {
+  const seen = new Set<string>();
   const grouped: Record<string, Article[]> = {};
   for (const result of results) {
-    if (result.articles.length > 0) {
-      grouped[result.source] = result.articles;
+    const deduped = result.articles.filter(a => {
+      const key = normalizeUrl(a.url);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+    if (deduped.length > 0) {
+      grouped[result.source] = deduped;
     }
   }
   return grouped;
@@ -36,8 +53,8 @@ export async function generateDaily(
   const dateStr = getDateString(date);
   const outputPath = join(outputDir, `${dateStr}.md`);
 
-  if (existsSync(outputPath)) {
-    console.log(`[generate] ${outputPath} already exists, skipping.`);
+  if (existsSync(outputPath) && !process.env.FORCE_REGEN) {
+    console.log(`[generate] ${outputPath} already exists, skipping. (Set FORCE_REGEN=1 to override)`);
     return outputPath;
   }
 
@@ -56,7 +73,7 @@ export async function generateDaily(
   const prompt = buildDailyPrompt(grouped, dateStr);
   const content = await aiGenerate(prompt);
 
-  const markdown = buildFrontmatter(dateStr) + `# AI News Daily / AI 新闻日报\n> ${dateStr}\n\n` + content;
+  const markdown = buildFrontmatter(dateStr) + `> ${dateStr}\n\n` + content;
 
   writeFileSync(outputPath, markdown, 'utf-8');
   console.log(`[generate] Written to ${outputPath}`);

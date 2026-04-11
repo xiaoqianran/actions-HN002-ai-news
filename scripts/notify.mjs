@@ -51,6 +51,23 @@ function buildPayload(type, status) {
 
   const plainText = textLines.join('\n');
 
+  // Markdown version for services that support it
+  const markdownLines = isSuccess
+    ? [
+        `**${title}**`,
+        ``,
+        `日期: ${reportDate}`,
+        siteUrl ? `站点: [${siteUrl}](${siteUrl})` : '',
+        dailyUrl ? `今日日报: [查看日报](${dailyUrl})` : '',
+      ].filter(Boolean)
+    : [
+        `**${title}**`,
+        ``,
+        `日期: ${reportDate}`,
+        runUrl ? `查看日志: [GitHub Actions](${runUrl})` : '',
+      ].filter(Boolean);
+  const markdown = markdownLines.join('\n');
+
   switch (type) {
     case 'wecom':
     case 'wechat':

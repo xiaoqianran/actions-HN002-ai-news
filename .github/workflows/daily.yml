@@ -2,8 +2,9 @@ name: Daily News Generate
 
 on:
   schedule:
-    # Run at 08:00 UTC every day
-    - cron: '0 0 * * *'
+    # Run at the specified time in Asia/Shanghai timezone
+    - cron: '24 6 * * *'
+      timezone: 'Asia/Shanghai'
   workflow_dispatch:
 
 permissions:

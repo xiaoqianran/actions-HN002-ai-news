@@ -194,11 +194,14 @@ const tocItems = headings.filter(h => h.depth === 2);
     .toc {
       gap: 0.35rem;
       padding: 0.5rem;
-      position: relative;
-      top: 0;
       overflow-x: auto;
       flex-wrap: nowrap;
       -webkit-overflow-scrolling: touch;
+      top: 0;
+      border-radius: 0;
+      margin-left: -0.75rem;
+      margin-right: -0.75rem;
+      width: calc(100% + 1.5rem);
     }
 
     .toc-item {
@@ -209,16 +212,16 @@ const tocItems = headings.filter(h => h.depth === 2);
 
     article :global(h2) {
       font-size: 1.1rem;
-      scroll-margin-top: 0.5rem;
+      scroll-margin-top: 3rem;
     }
 
     .day-nav {
-      flex-direction: column;
       gap: 0.5rem;
     }
 
-    .day-nav-link.next {
-      text-align: left;
+    .day-nav-link {
+      flex: 1;
+      padding: 0.5rem 0.75rem;
     }
   }
 </style>

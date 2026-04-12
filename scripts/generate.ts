@@ -5,7 +5,8 @@ import { aiGenerate, buildDailyPrompt } from './ai/index.js';
 
 function getDateString(date?: Date): string {
   const d = date ?? new Date();
-  return d.toISOString().split('T')[0];
+  // Use Asia/Shanghai timezone to match the GitHub Actions cron schedule
+  return d.toLocaleDateString('en-CA', { timeZone: 'Asia/Shanghai' });
 }
 
 function normalizeUrl(raw: string): string {

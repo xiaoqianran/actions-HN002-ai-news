@@ -62,7 +62,7 @@ jobs:
           fi
 
       - name: Notify Webhook (Success)
-        if: success() && steps.commit.outputs.changed == 'true' && secrets.WEBHOOK_URL != ''
+        if: success() && steps.commit.outputs.changed == 'true' && env.WEBHOOK_URL != ''
         env:
           WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
           WEBHOOK_TYPE: ${{ secrets.WEBHOOK_TYPE }}
@@ -71,7 +71,7 @@ jobs:
         run: node scripts/notify.mjs success
 
       - name: Notify Webhook (Failure)
-        if: failure() && secrets.WEBHOOK_URL != ''
+        if: failure() && env.WEBHOOK_URL != ''
         env:
           WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
           WEBHOOK_TYPE: ${{ secrets.WEBHOOK_TYPE }}

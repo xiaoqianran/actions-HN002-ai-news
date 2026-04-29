@@ -36,6 +36,8 @@ function groupBySource(results: FetchResult[]): Record<string, Article[]> {
   return grouped;
 }
 
+import { crawlAndTranslateArticle } from './fetch/crawler.js';
+
 function buildFrontmatter(date: string): string {
   return `---
 title: "AI News Daily - ${date}"
@@ -68,6 +70,17 @@ export async function generateDaily(
   }
 
   console.log(`[generate] ${articleCount} articles from ${sourceCount} sources`);
+  
+  console.log('[generate] Crawling and translating full content for articles...');
+  for (const source in grouped) {
+    for (const article of grouped[source]) {
+      const localUrl = await crawlAndTranslateArticle(article.url, article.title);
+      if (localUrl) {
+        article.url = localUrl;
+      }
+    }
+  }
+
   console.log('[generate] Calling AI to generate daily digest...');
 
   const prompt = buildDailyPrompt(grouped, dateStr);

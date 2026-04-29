@@ -1,0 +1,91 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('news');
+  return posts.map(post => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+---
+
+<Layout title={post.data.title}>
+  <article class="news-detail">
+    <header class="news-header">
+      <h1>{post.data.title}</h1>
+      <div class="news-meta">
+        <a href={post.data.originalUrl} target="_blank" rel="noopener noreferrer" class="original-link">
+          查看原文 / View Original
+        </a>
+      </div>
+    </header>
+
+    <div class="news-content">
+      <Content />
+    </div>
+    
+    <div class="news-footer">
+      <a href="/" class="back-link">← 返回新闻列表 / Back to news list</a>
+    </div>
+  </article>
+</Layout>
+
+<style>
+  .news-detail {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+  .news-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .news-header h1 {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+  }
+  .news-meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+  }
+  .original-link {
+    display: inline-flex;
+    align-items: center;
+    color: var(--color-accent);
+  }
+  .original-link:hover {
+    text-decoration: underline;
+  }
+  .news-content {
+    line-height: 1.8;
+  }
+  .news-content :global(p) {
+    margin-bottom: 1.25rem;
+  }
+  .news-footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-border);
+    text-align: center;
+  }
+  .back-link {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .back-link:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+</style>

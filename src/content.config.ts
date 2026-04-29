@@ -9,4 +9,13 @@ const daily = defineCollection({
   }),
 });
 
-export const collections = { daily };
+const news = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/news' }),
+  schema: z.object({
+    title: z.string(),
+    originalUrl: z.string(),
+    date: z.coerce.string(),
+  }),
+});
+
+export const collections = { daily, news };

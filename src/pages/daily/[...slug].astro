@@ -90,8 +90,6 @@ const tocItems = headings.filter(h => h.depth === 2);
       <button class="wechat-guide-btn" id="wechat-guide-close">我知道了</button>
     </div>
   </div>
-  
-  <script src="https://res.wx.qq.com/open/js/jweixin-1.6.0.js"></script>
 </Layout>
 
 <style>
@@ -594,58 +592,19 @@ const tocItems = headings.filter(h => h.depth === 2);
   const guideOverlay = document.getElementById('wechat-guide-overlay')!;
   const guideClose = document.getElementById('wechat-guide-close')!;
   
+  let originalTitle = document.title;
+  let originalUrl = window.location.href;
+
   if (guideClose) {
     guideClose.addEventListener('click', () => {
       guideOverlay.classList.remove('active');
+      if (document.title !== originalTitle) {
+        document.title = originalTitle;
+      }
+      if (window.location.href !== originalUrl) {
+        history.replaceState(null, '', originalUrl);
+      }
     });
-  }
-
-  // --- WeChat JSSDK Setup ---
-  // 注意：需要后端接口提供签名。这里预留了接口调用逻辑。
-  async function initWechatJSSDK() {
-    if (!isWeChat || !window.wx) return;
-    
-    try {
-      // TODO: 替换为实际的签名接口地址
-      const url = encodeURIComponent(window.location.href.split('#')[0]);
-      // const response = await fetch(`/api/wechat/signature?url=${url}`);
-      // const config = await response.json();
-      
-      // wx.config({
-      //   debug: false,
-      //   appId: config.appId,
-      //   timestamp: config.timestamp,
-      //   nonceStr: config.nonceStr,
-      //   signature: config.signature,
-      //   jsApiList: ['updateAppMessageShareData', 'updateTimelineShareData']
-      // });
-      
-      // wx.ready(() => {
-      //   console.log('WeChat JSSDK is ready');
-      // });
-    } catch (e) {
-      console.error('Failed to init WeChat JSSDK', e);
-    }
-  }
-  
-  // Call it on load
-  initWechatJSSDK();
-
-  function updateWechatShareData(title: string, desc: string, link: string) {
-    if (!isWeChat || !window.wx) return;
-    // wx.ready(() => {
-    //   wx.updateAppMessageShareData({ 
-    //     title, 
-    //     desc, 
-    //     link, 
-    //     imgUrl: window.location.origin + '/icons/icon128.png' 
-    //   });
-    //   wx.updateTimelineShareData({ 
-    //     title, 
-    //     link, 
-    //     imgUrl: window.location.origin + '/icons/icon128.png' 
-    //   });
-    // });
   }
 
   // WeChat Share & Bookmark QR Modal logic
@@ -661,9 +620,12 @@ const tocItems = headings.filter(h => h.depth === 2);
 
   function openModal(mode: 'share' | 'fav', urlToShare: string, itemTitle?: string) {
     if (isWeChat) {
-      // 如果是在微信内，直接使用 JSSDK 更新分享内容，并弹出引导右上角分享的浮层
-      const title = itemTitle ? itemTitle : document.title;
-      updateWechatShareData(title, '发现了一篇很棒的 AI 新闻！', urlToShare);
+      if (itemTitle) {
+        originalTitle = document.title;
+        originalUrl = window.location.href;
+        document.title = itemTitle;
+        history.replaceState(null, '', urlToShare);
+      }
       guideOverlay.classList.add('active');
       return;
     }

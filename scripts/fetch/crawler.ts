@@ -1,5 +1,5 @@
 import * as cheerio from 'cheerio';
-import fetch from 'node-fetch';
+import { proxyFetch } from '../proxy.js';
 import { aiGenerate } from '../ai/provider.js';
 import { writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
@@ -25,7 +25,7 @@ export async function crawlAndTranslateArticle(url: string, title: string): Prom
   console.log(`[crawler] Fetching detail for: ${title} (${url})`);
   let text = '';
   try {
-    const res = await fetch(url, {
+    const res = await proxyFetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
       },

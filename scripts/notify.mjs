@@ -26,44 +26,70 @@ if (!webhookUrl) {
 }
 
 /** Build request body based on webhook type */
-function buildPayload(type, status) {
+function buildPayload(type, status, weather = '') {
   const isSuccess = status === 'success';
-  const title = isSuccess
-    ? `AI News Daily · ${reportDate} 已生成`
-    : `AI News Daily · ${reportDate} 生成失败`;
+  const isStart = status === 'start';
+  let title = '';
+  if (isStart) {
+    title = `AI News Daily · ${reportDate} 开始生成`;
+  } else if (isSuccess) {
+    title = `AI News Daily · ${reportDate} 已生成`;
+  } else {
+    title = `AI News Daily · ${reportDate} 生成失败`;
+  }
 
   const dailyUrl = siteUrl ? `${siteUrl.replace(/\/$/, '')}/daily/${reportDate}` : '';
 
-  const textLines = isSuccess
-    ? [
-        title,
-        ``,
-        `日期: ${reportDate}`,
-        dailyUrl ? `今日日报: ${dailyUrl}` : '',
-      ].filter(Boolean)
-    : [
-        `❌ ${title}`,
-        ``,
-        `日期: ${reportDate}`,
-        runUrl ? `查看日志: ${runUrl}` : '',
-      ].filter(Boolean);
+  let textLines = [];
+  let markdownLines = [];
+
+  if (isStart) {
+    textLines = [
+      `▶️ ${title}`,
+      ``,
+      `日期: ${reportDate}`,
+      weather ? `北京天气: ${weather}` : '',
+      runUrl ? `查看日志: ${runUrl}` : '',
+    ].filter(Boolean);
+
+    markdownLines = [
+      `**▶️ ${title}**`,
+      ``,
+      `日期: ${reportDate}`,
+      weather ? `北京天气: ${weather}` : '',
+      runUrl ? `查看日志: [GitHub Actions](${runUrl})` : '',
+    ].filter(Boolean);
+  } else if (isSuccess) {
+    textLines = [
+      title,
+      ``,
+      `日期: ${reportDate}`,
+      dailyUrl ? `今日日报: ${dailyUrl}` : '',
+    ].filter(Boolean);
+
+    markdownLines = [
+      `**${title}**`,
+      ``,
+      `日期: ${reportDate}`,
+      dailyUrl ? `今日日报: [查看日报](${dailyUrl})` : '',
+    ].filter(Boolean);
+  } else {
+    textLines = [
+      `❌ ${title}`,
+      ``,
+      `日期: ${reportDate}`,
+      runUrl ? `查看日志: ${runUrl}` : '',
+    ].filter(Boolean);
+
+    markdownLines = [
+      `**❌ ${title}**`,
+      ``,
+      `日期: ${reportDate}`,
+      runUrl ? `查看日志: [GitHub Actions](${runUrl})` : '',
+    ].filter(Boolean);
+  }
 
   const plainText = textLines.join('\n');
-
-  // Markdown version for services that support it
-  const markdownLines = isSuccess
-    ? [
-        `**${title}**`,
-        ``,
-        `日期: ${reportDate}`,
-        dailyUrl ? `今日日报: [查看日报](${dailyUrl})` : '',
-      ].filter(Boolean)
-    : [
-        `**${title}**`,
-        ``,
-        `日期: ${reportDate}`,
-        runUrl ? `查看日志: [GitHub Actions](${runUrl})` : '',
-      ].filter(Boolean);
   const markdown = markdownLines.join('\n');
 
   switch (type) {
@@ -125,9 +151,25 @@ function buildPayload(type, status) {
       };
   }
 }
+async function getWeather() {
+  try {
+    const res = await fetch('https://wttr.in/Beijing?format=3');
+    if (res.ok) {
+      return (await res.text()).trim();
+    }
+  } catch (err) {
+    console.error('[notify] Failed to fetch weather:', err);
+  }
+  return '';
+}
 
 async function main() {
-  const payload = buildPayload(webhookType, status);
+  let weather = '';
+  if (status === 'start') {
+    weather = await getWeather();
+  }
+
+  const payload = buildPayload(webhookType, status, weather);
 
   console.log(`[notify] Sending ${status} notification via ${webhookType} webhook...`);
 

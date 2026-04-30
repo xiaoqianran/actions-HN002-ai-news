@@ -12,6 +12,7 @@ permissions:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
 
 jobs:
   generate:
@@ -29,6 +30,17 @@ jobs:
         uses: pnpm/action-setup@v4
         with:
           run_install: true
+
+      - name: Notify Webhook (Start)
+        if: env.WEBHOOK_URL != ''
+        env:
+          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+          WEBHOOK_TYPE: ${{ secrets.WEBHOOK_TYPE }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          TZ: Asia/Shanghai
+        run: |
+          export REPORT_DATE=$(date +%Y-%m-%d)
+          node scripts/notify.mjs start
 
       - name: Fetch and Generate
         id: generate

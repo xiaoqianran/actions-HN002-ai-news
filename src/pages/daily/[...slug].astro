@@ -267,42 +267,7 @@ const tocItems = headings.filter(h => h.depth === 2);
     }
   }
 
-  /* ===== Item Share Actions ===== */
-  article :global(.read-more-wrapper) {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-top: 0.25rem;
-  }
-  article :global(.read-more-wrapper p) {
-    margin: 0;
-  }
-  article :global(.read-more-wrapper p > a) {
-    margin-top: 0 !important;
-  }
-  article :global(.item-actions) {
-    display: flex;
-    gap: 0.4rem;
-    align-items: center;
-  }
-  article :global(.item-action-btn) {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    border-radius: 6px;
-    border: 1px solid var(--color-border);
-    background: var(--color-surface);
-    color: var(--color-text-muted);
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  article :global(.item-action-btn:hover) {
-    border-color: #07c160;
-    color: #07c160;
-    background: rgba(7, 193, 96, 0.06);
-  }
+
 
   /* ===== WeChat Guide Overlay ===== */
   .wechat-guide-overlay {
@@ -676,49 +641,5 @@ const tocItems = headings.filter(h => h.depth === 2);
   overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
 
-  // Add individual share/fav buttons to each news item
-  const articles = document.querySelectorAll('article h3');
-  articles.forEach(h3 => {
-    let next = h3.nextElementSibling;
-    let readMoreP = null;
-    while (next && next.tagName !== 'HR' && next.tagName !== 'H2' && next.tagName !== 'H3') {
-      if (next.tagName === 'P') {
-        const a = next.querySelector('a');
-        if (a && (a.textContent?.includes('Read more') || a.getAttribute('href')?.startsWith('http'))) {
-          readMoreP = next;
-          break;
-        }
-      }
-      next = next.nextElementSibling;
-    }
 
-    if (readMoreP && readMoreP.parentNode) {
-      const itemUrl = `${window.location.origin}${window.location.pathname}#${h3.id}`;
-      const itemTitle = h3.textContent || undefined;
-      
-      const actions = document.createElement('div');
-      actions.className = 'item-actions';
-      
-      const shareBtn = document.createElement('button');
-      shareBtn.className = 'item-action-btn wechat-share';
-      shareBtn.title = '分享到微信';
-      shareBtn.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.328.328 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05a6.127 6.127 0 0 1-.253-1.734c0-3.407 3.167-6.175 7.063-6.175.381 0 .752.034 1.114.09C16.789 5.381 13.166 2.188 8.691 2.188zm-2.6 4.408c.56 0 1.016.455 1.016 1.016s-.455 1.016-1.016 1.016S5.075 8.172 5.075 7.612s.455-1.016 1.016-1.016zm5.215 0c.56 0 1.016.455 1.016 1.016s-.455 1.016-1.016 1.016-1.016-.455-1.016-1.016.456-1.016 1.016-1.016zm4.006 3.585c-3.385 0-6.134 2.326-6.134 5.194 0 2.87 2.749 5.194 6.134 5.194.466 0 .92-.048 1.362-.132a.726.726 0 0 1 .6.082l1.473.86a.27.27 0 0 0 .138.045c.132 0 .24-.108.24-.24 0-.06-.023-.118-.038-.174l-.3-1.146a.498.498 0 0 1 .177-.555C22.917 18.457 24 16.686 24 14.375c0-2.868-2.749-5.194-6.134-5.194h.912zm-2.136 2.98c.467 0 .847.38.847.847s-.38.847-.847.847a.848.848 0 0 1-.847-.847c0-.467.38-.847.847-.847zm4.272 0c.467 0 .847.38.847.847s-.38.847-.847.847a.848.848 0 0 1-.847-.847c0-.467.38-.847.847-.847z"/></svg>';
-      shareBtn.addEventListener('click', () => openModal('share', itemUrl, itemTitle));
-      
-      const favBtn = document.createElement('button');
-      favBtn.className = 'item-action-btn wechat-fav';
-      favBtn.title = '收藏到微信';
-      favBtn.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
-      favBtn.addEventListener('click', () => openModal('fav', itemUrl, itemTitle));
-      
-      actions.appendChild(shareBtn);
-      actions.appendChild(favBtn);
-      
-      const wrapper = document.createElement('div');
-      wrapper.className = 'read-more-wrapper';
-      readMoreP.parentNode.insertBefore(wrapper, readMoreP);
-      wrapper.appendChild(readMoreP);
-      wrapper.appendChild(actions);
-    }
-  });
 </script>

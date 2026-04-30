@@ -153,7 +153,7 @@ function buildPayload(type, status, weather = '') {
 }
 async function getWeather() {
   try {
-    const res = await fetch('https://wttr.in/Beijing?format=3');
+    const res = await fetch('https://wttr.in/Beijing?format=%c+%t&m');
     if (res.ok) {
       return (await res.text()).trim();
     }

@@ -74,7 +74,7 @@ export async function generateDaily(
   console.log('[generate] Crawling and translating full content for articles...');
   for (const source in grouped) {
     for (const article of grouped[source]) {
-      const localUrl = await crawlAndTranslateArticle(article.url, article.title);
+      const localUrl = await crawlAndTranslateArticle(article.url, article.title, dateStr);
       if (localUrl) {
         article.url = localUrl;
       }

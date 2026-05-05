@@ -1,7 +1,7 @@
 import * as cheerio from 'cheerio';
 import { proxyFetch } from '../proxy.js';
 import { aiGenerate } from '../ai/provider.js';
-import { writeFileSync, existsSync, mkdirSync } from 'node:fs';
+import { writeFileSync, existsSync, mkdirSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import * as crypto from 'node:crypto';
 
@@ -14,12 +14,27 @@ export function urlToSlug(url: string): string {
   return crypto.createHash('md5').update(url).digest('hex').substring(0, 12);
 }
 
-export async function crawlAndTranslateArticle(url: string, title: string): Promise<string | null> {
+export async function crawlAndTranslateArticle(url: string, title: string, dateStr?: string): Promise<string | null> {
   const slug = urlToSlug(url);
-  const outPath = join(NEWS_DIR, `${slug}.md`);
+  const pathPrefix = dateStr ? `${dateStr}/` : '';
+  const dirPath = join(NEWS_DIR, dateStr || '');
+  if (!existsSync(dirPath)) {
+    mkdirSync(dirPath, { recursive: true });
+  }
+
+  const outPath = join(dirPath, `${slug}.md`);
   
   if (existsSync(outPath)) {
-    return `/news/${slug}`;
+    return `/news/${pathPrefix}${slug}`;
+  }
+
+  const dirs = readdirSync(NEWS_DIR, { withFileTypes: true });
+  for (const dir of dirs) {
+    if (dir.isDirectory() && dir.name !== (dateStr || '')) {
+      if (existsSync(join(NEWS_DIR, dir.name, `${slug}.md`))) {
+        return `/news/${dir.name}/${slug}`;
+      }
+    }
   }
 
   console.log(`[crawler] Fetching detail for: ${title} (${url})`);
@@ -75,7 +90,7 @@ date: "${new Date().toISOString()}"
 `;
     writeFileSync(outPath, frontmatter + translated, 'utf-8');
     console.log(`[crawler] Saved translated detail to ${outPath}`);
-    return `/news/${slug}`;
+    return `/news/${pathPrefix}${slug}`;
   } catch (err) {
     console.error(`[crawler] Translation failed for ${url}:`, err);
     return null;

@@ -49,9 +49,9 @@ GitHub Actions (每日定时)
 pnpm install
 ```
 
-### 配置 AI 服务商
+### 配置环境变量
 
-设置环境变量：
+设置您偏好的 AI 服务商及其他可选功能的配置。您也可以复制 `.env.example` 为 `.env` 来在本地配置：
 
 ```bash
 # 选择服务商: openai | anthropic | google | deepseek
@@ -66,6 +66,9 @@ export ANTHROPIC_API_KEY=sk-ant-xxx
 export GOOGLE_GENERATIVE_AI_API_KEY=xxx
 # 或
 export DEEPSEEK_API_KEY=xxx
+
+# （可选）配置 Google Analytics 衡量 ID
+export PUBLIC_GA_ID=G-XXXXXXXXXX
 ```
 
 ### 本地运行
@@ -160,39 +163,37 @@ export default myPlugin;
 
 然后在 `scripts/fetch/index.ts` 中注册。
 
-## GitHub Actions
+## 生产环境部署
 
-每日工作流在 **UTC 08:00** 自动运行：
+本项目设计为完全托管在免服务器架构上，您需要完成 GitHub Secrets 配置以运行自动采集流水线，并配置 Cloudflare Pages 来托管前端网页。
 
-1. 拉取仓库代码
-2. 安装依赖
-3. 执行采集 + AI 生成流水线
-4. 提交并推送新的日报 Markdown
-5. Cloudflare Pages 自动部署
+### 1. 配置 GitHub Secrets
 
-### 必需的 Secrets
+每日的新闻采集与生成由 GitHub Actions 自动运行。前往您的 GitHub 仓库 **Settings > Secrets and variables > Actions**，配置以下变量：
 
-在 GitHub 仓库 **Settings > Secrets** 中设置：
-
-- `AI_PROVIDER` — AI 服务商名称
-- `AI_MODEL` — 模型标识
+#### 必需的 Secrets
+- `AI_PROVIDER` — AI 服务商名称（如 `openai`, `anthropic`, `google`, `deepseek`）
+- `AI_MODEL` — 模型标识（如 `gpt-4o`）
 - `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` / `GOOGLE_GENERATIVE_AI_API_KEY` / `DEEPSEEK_API_KEY` — 对应服务商的 API Key
 
-### 可选 Secrets
-
+#### 可选 Secrets
 - `PRODUCTHUNT_CLIENT_ID` / `PRODUCTHUNT_CLIENT_SECRET` / `PRODUCTHUNT_API_TOKEN` — Product Hunt API（无配置时回退到 RSS）
 - `WEBHOOK_URL` — 通知 Webhook 地址
 - `WEBHOOK_TYPE` — 类型：`wecom`(企业微信) | `dingtalk`(钉钉) | `feishu`(飞书) | `slack` | `generic`
 - `SITE_URL` — 你的网站访问地址（如 `https://your-site.com`），用于在通知消息中拼接日报的直达链接
+- `PUBLIC_GA_ID` — Google Analytics 衡量 ID（如 `G-XXXXXXXXXX`）。构建工作流会自动提取并应用到前端网页。
 
-## Cloudflare Pages 部署
+### 2. 配置 Cloudflare Pages 
+
+前端网站通过 Cloudflare Pages 自动部署：
 
 1. 前往 [Cloudflare 控制台](https://dash.cloudflare.com/) > Pages
 2. 创建项目 > 连接你的 GitHub 仓库
 3. 构建设置：
+   - **框架预设**: Astro (或保留 None)
    - **构建命令**: `pnpm run build`
    - **输出目录**: `dist`
-4. 完成！每次推送自动触发部署。
+4. 完成！每次 GitHub Actions 推送新的新闻数据时，Cloudflare 都会自动触发前端站点的重新构建与发布。
 
 ## 项目结构
 

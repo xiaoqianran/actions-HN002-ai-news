@@ -49,9 +49,9 @@ GitHub Actions (cron daily)
 pnpm install
 ```
 
-### Configure AI Provider
+### Configure Environment
 
-Set environment variables for your preferred AI provider:
+Set environment variables for your preferred AI provider and optional features. You can also copy `.env.example` to `.env` to set these locally:
 
 ```bash
 # Choose provider: openai | anthropic | google | deepseek
@@ -66,6 +66,9 @@ export ANTHROPIC_API_KEY=sk-ant-xxx
 export GOOGLE_GENERATIVE_AI_API_KEY=xxx
 # or
 export DEEPSEEK_API_KEY=xxx
+
+# (Optional) Google Analytics Measurement ID
+export PUBLIC_GA_ID=G-XXXXXXXXXX
 ```
 
 ### Run Locally
@@ -160,39 +163,37 @@ export default myPlugin;
 
 Then register it in `scripts/fetch/index.ts`.
 
-## GitHub Actions
+## Production Deployment
 
-The daily workflow runs at **08:00 UTC** every day:
+The project is designed to run entirely on serverless architecture. You need to configure GitHub Secrets for the automated data pipeline and Cloudflare Pages for website hosting.
 
-1. Checks out the repo
-2. Installs dependencies
-3. Runs the fetch + AI generate pipeline
-4. Commits and pushes the new daily markdown
-5. Cloudflare Pages auto-deploys on push
+### 1. Configure GitHub Secrets
 
-### Required Secrets
+The daily fetching and generating pipeline runs via GitHub Actions at **08:00 UTC** every day. Go to your GitHub repository **Settings > Secrets and variables > Actions** and add the following repository secrets:
 
-Set these in your GitHub repo **Settings > Secrets**:
+#### Required Secrets
 
-- `AI_PROVIDER` — AI provider name
-- `AI_MODEL` — Model identifier
+- `AI_PROVIDER` — AI provider name (e.g., `openai`, `anthropic`, `google`, `deepseek`)
+- `AI_MODEL` — Model identifier (e.g., `gpt-4o`)
 - `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` / `GOOGLE_GENERATIVE_AI_API_KEY` / `DEEPSEEK_API_KEY` — API key for your chosen provider
 
-### Optional Secrets
+#### Optional Secrets
 
 - `PRODUCTHUNT_CLIENT_ID` / `PRODUCTHUNT_CLIENT_SECRET` / `PRODUCTHUNT_API_TOKEN` — Product Hunt API (falls back to RSS if not configured)
 - `WEBHOOK_URL` — Notification webhook endpoint
 - `WEBHOOK_TYPE` — One of: `wecom` | `dingtalk` | `feishu` | `slack` | `generic`
 - `SITE_URL` — Your deployed website URL (e.g., `https://your-site.com`), used for direct links in webhook notifications
+- `PUBLIC_GA_ID` — Google Analytics Measurement ID (e.g., `G-XXXXXXXXXX`). The build workflow will automatically inject this into the frontend.
 
-## Cloudflare Pages Setup
+### 2. Cloudflare Pages Setup
 
 1. Go to [Cloudflare Dashboard](https://dash.cloudflare.com/) > Pages
 2. Create a project > Connect to your GitHub repo
 3. Build settings:
+   - **Framework preset**: Astro (or None)
    - **Build command**: `pnpm run build`
    - **Build output directory**: `dist`
-4. Done! Every push triggers a new deployment.
+4. Done! Every time GitHub Actions pushes a new daily report, Cloudflare will automatically trigger a deployment.
 
 ## Project Structure
 

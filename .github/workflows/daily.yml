@@ -57,6 +57,12 @@ jobs:
           echo "date=$(date +%Y-%m-%d)" >> $GITHUB_OUTPUT
           echo "file=src/content/daily/$(date +%Y-%m-%d).md" >> $GITHUB_OUTPUT
 
+      - name: Update Site Config
+        env:
+          PUBLIC_GA_ID: ${{ secrets.PUBLIC_GA_ID }}
+        run: |
+          echo "{\"gaId\": \"$PUBLIC_GA_ID\"}" > config/site.json
+
       - name: Commit and Push
         id: commit
         env:
@@ -64,7 +70,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add src/content/daily/ src/content/news/
+          git add src/content/daily/ src/content/news/ config/site.json
           if git diff --staged --quiet; then
             echo "changed=false" >> $GITHUB_OUTPUT
           else

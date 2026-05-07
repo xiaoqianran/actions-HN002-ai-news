@@ -5,8 +5,7 @@ interface Props {
 }
 
 const { title, backUrl } = Astro.props;
-import siteConfig from '../../config/site.json';
-const gaId = import.meta.env.PUBLIC_GA_ID || siteConfig.gaId;
+const gaId = import.meta.env.PUBLIC_GA_ID;
 ---
 
 <!doctype html>

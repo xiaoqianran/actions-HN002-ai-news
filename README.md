@@ -183,7 +183,6 @@ The daily fetching and generating pipeline runs via GitHub Actions at **08:00 UT
 - `WEBHOOK_URL` — Notification webhook endpoint
 - `WEBHOOK_TYPE` — One of: `wecom` | `dingtalk` | `feishu` | `slack` | `generic`
 - `SITE_URL` — Your deployed website URL (e.g., `https://your-site.com`), used for direct links in webhook notifications
-- `PUBLIC_GA_ID` — Google Analytics Measurement ID (e.g., `G-XXXXXXXXXX`). The build workflow will automatically inject this into the frontend.
 
 ### 2. Cloudflare Pages Setup
 
@@ -193,7 +192,8 @@ The daily fetching and generating pipeline runs via GitHub Actions at **08:00 UT
    - **Framework preset**: Astro (or None)
    - **Build command**: `pnpm run build`
    - **Build output directory**: `dist`
-4. Done! Every time GitHub Actions pushes a new daily report, Cloudflare will automatically trigger a deployment.
+4. **Environment Variables (Optional)**: Add `PUBLIC_GA_ID` with your Google Analytics Measurement ID (e.g., `G-XXXXXXXXXX`) to enable traffic tracking.
+5. Done! Every time GitHub Actions pushes a new daily report, Cloudflare will automatically trigger a deployment.
 
 ## Project Structure
 

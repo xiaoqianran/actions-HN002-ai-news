@@ -181,7 +181,6 @@ export default myPlugin;
 - `WEBHOOK_URL` — 通知 Webhook 地址
 - `WEBHOOK_TYPE` — 类型：`wecom`(企业微信) | `dingtalk`(钉钉) | `feishu`(飞书) | `slack` | `generic`
 - `SITE_URL` — 你的网站访问地址（如 `https://your-site.com`），用于在通知消息中拼接日报的直达链接
-- `PUBLIC_GA_ID` — Google Analytics 衡量 ID（如 `G-XXXXXXXXXX`）。构建工作流会自动提取并应用到前端网页。
 
 ### 2. 配置 Cloudflare Pages 
 
@@ -193,7 +192,8 @@ export default myPlugin;
    - **框架预设**: Astro (或保留 None)
    - **构建命令**: `pnpm run build`
    - **输出目录**: `dist`
-4. 完成！每次 GitHub Actions 推送新的新闻数据时，Cloudflare 都会自动触发前端站点的重新构建与发布。
+4. **环境变量（可选）**：如果需要统计网站流量，请添加环境变量 `PUBLIC_GA_ID`，值为你的 Google Analytics 衡量 ID（如 `G-XXXXXXXXXX`）。
+5. 完成！每次 GitHub Actions 推送新的新闻数据时，Cloudflare 都会自动触发前端站点的重新构建与发布。
 
 ## 项目结构
 

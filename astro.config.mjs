@@ -4,7 +4,9 @@ import { defineConfig } from 'astro/config';
 // Override via env for custom domains (set BASE_PATH=/ and SITE_URL=https://example.com).
 const repo = 'actions-HN002-ai-news';
 const site = process.env.SITE_URL || 'https://xiaoqianran.github.io';
-const base = process.env.BASE_PATH || `/${repo}`;
+// Astro expects base with leading slash; trailing slash is optional but we keep one form.
+const rawBase = process.env.BASE_PATH || `/${repo}`;
+const base = rawBase === '/' ? '/' : `/${rawBase.replace(/^\/+|\/+$/g, '')}`;
 
 /** Prefix root-absolute href/src in Markdown so /news/... works under project Pages base. */
 function rehypePrefixBase(basePath) {

@@ -6,6 +6,11 @@ interface Props {
 
 const { title, backUrl } = Astro.props;
 const gaId = import.meta.env.PUBLIC_GA_ID;
+const base = import.meta.env.BASE_URL; // e.g. /actions-HN002-ai-news/
+const homeUrl = base;
+const resolvedBackUrl = backUrl
+  ? (backUrl.startsWith('/') ? `${base.replace(/\/$/, '')}${backUrl === '/' ? '' : backUrl}` || base : backUrl)
+  : undefined;
 ---
 
 <!doctype html>
@@ -25,7 +30,7 @@ const gaId = import.meta.env.PUBLIC_GA_ID;
     )}
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="AI-powered daily tech news digest in English and Chinese" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
     <title>{title}</title>
     <script is:inline>
       // Prevent FOUC: apply saved theme before paint
@@ -39,12 +44,12 @@ const gaId = import.meta.env.PUBLIC_GA_ID;
 
     <header>
       <nav>
-        {backUrl && (
-          <a href={backUrl} class="back-link js-back-link" id="nav-back-link" aria-label="返回上一页" title="返回上一页">
+        {resolvedBackUrl && (
+          <a href={resolvedBackUrl} class="back-link js-back-link" id="nav-back-link" aria-label="返回上一页" title="返回上一页">
             <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
           </a>
         )}
-        <a href="/" class="logo">AI News Daily</a>
+        <a href={homeUrl} class="logo">AI News Daily</a>
         <span class="tagline">AI 新闻日报</span>
         <button class="theme-toggle" id="theme-toggle" aria-label="切换主题"></button>
       </nav>

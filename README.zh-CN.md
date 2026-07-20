@@ -24,7 +24,7 @@ GitHub Actions (每日定时)
 | 托管 | Cloudflare Pages (免费) |
 | 调度 | GitHub Actions 定时任务 |
 | 采集 | 插件化架构 (RSS、API、爬虫) + 自动重试 |
-| AI | Vercel AI SDK (OpenAI / Claude / Gemini / DeepSeek) |
+| AI | Vercel AI SDK（NVIDIA NIM / OpenAI 兼容 / Claude / Gemini / DeepSeek） |
 | 语言 | TypeScript |
 
 ## 特性
@@ -54,18 +54,18 @@ pnpm install
 设置您偏好的 AI 服务商及其他可选功能的配置。您也可以复制 `.env.example` 为 `.env` 来在本地配置：
 
 ```bash
-# 选择服务商: openai | anthropic | google | deepseek
-export AI_PROVIDER=openai
-export AI_MODEL=gpt-4o
+# 默认：NVIDIA NIM（OpenAI 兼容接口）
+# 可选服务商: nvidia-nim | openai | anthropic | google | deepseek
+export AI_PROVIDER=nvidia-nim
+export AI_MODEL=stepfun-ai/step-3.5-flash
+export OPENAI_BASE_URL=https://integrate.api.nvidia.com/v1
+export OPENAI_API_KEY=nvapi-xxx
 
-# 设置对应的 API Key
-export OPENAI_API_KEY=sk-xxx
-# 或
-export ANTHROPIC_API_KEY=sk-ant-xxx
-# 或
-export GOOGLE_GENERATIVE_AI_API_KEY=xxx
-# 或
-export DEEPSEEK_API_KEY=xxx
+# 或其他服务商：
+# export AI_PROVIDER=openai && export AI_MODEL=gpt-4o && export OPENAI_API_KEY=sk-xxx
+# export AI_PROVIDER=anthropic && export ANTHROPIC_API_KEY=sk-ant-xxx
+# export AI_PROVIDER=google && export GOOGLE_GENERATIVE_AI_API_KEY=xxx
+# export AI_PROVIDER=deepseek && export DEEPSEEK_API_KEY=xxx
 
 # （可选）配置 Google Analytics 衡量 ID
 export PUBLIC_GA_ID=G-XXXXXXXXXX
@@ -172,11 +172,15 @@ export default myPlugin;
 每日的新闻采集与生成由 GitHub Actions 自动运行。前往您的 GitHub 仓库 **Settings > Secrets and variables > Actions**，配置以下变量：
 
 #### 必需的 Secrets
-- `AI_PROVIDER` — AI 服务商名称（如 `openai`, `anthropic`, `google`, `deepseek`）
-- `AI_MODEL` — 模型标识（如 `gpt-4o`）
-- `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` / `GOOGLE_GENERATIVE_AI_API_KEY` / `DEEPSEEK_API_KEY` — 对应服务商的 API Key
+- `OPENAI_API_KEY` — NVIDIA NIM / OpenAI 兼容接口的 API Key（如 `nvapi-xxx`）
 
-#### 可选 Secrets
+#### 可选 Variables（默认值如下）
+- `AI_PROVIDER` — 默认 `nvidia-nim`（可选 `openai` | `anthropic` | `google` | `deepseek` | `nvidia-nim`）
+- `AI_MODEL` — 默认 `stepfun-ai/step-3.5-flash`
+- `OPENAI_BASE_URL` — 默认 `https://integrate.api.nvidia.com/v1`
+
+#### 可选 Secrets（其他服务商 / 附加功能）
+- `ANTHROPIC_API_KEY` / `GOOGLE_GENERATIVE_AI_API_KEY` / `DEEPSEEK_API_KEY` — 若不用 NVIDIA NIM
 - `PRODUCTHUNT_CLIENT_ID` / `PRODUCTHUNT_CLIENT_SECRET` / `PRODUCTHUNT_API_TOKEN` — Product Hunt API（无配置时回退到 RSS）
 - `WEBHOOK_URL` — 通知 Webhook 地址
 - `WEBHOOK_TYPE` — 类型：`wecom`(企业微信) | `dingtalk`(钉钉) | `feishu`(飞书) | `slack` | `generic`

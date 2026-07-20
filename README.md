@@ -24,7 +24,7 @@ GitHub Actions (cron daily)
 | Hosting | Cloudflare Pages (free) |
 | Scheduler | GitHub Actions cron |
 | Fetching | Plugin-based (RSS, API, Crawler) with auto-retry |
-| AI | Vercel AI SDK (OpenAI / Claude / Gemini / DeepSeek) |
+| AI | Vercel AI SDK (NVIDIA NIM / OpenAI-compatible / Claude / Gemini / DeepSeek) |
 | Language | TypeScript |
 
 ## Features
@@ -54,18 +54,18 @@ pnpm install
 Set environment variables for your preferred AI provider and optional features. You can also copy `.env.example` to `.env` to set these locally:
 
 ```bash
-# Choose provider: openai | anthropic | google | deepseek
-export AI_PROVIDER=openai
-export AI_MODEL=gpt-4o
+# Default: NVIDIA NIM (OpenAI-compatible)
+# Providers: nvidia-nim | openai | anthropic | google | deepseek
+export AI_PROVIDER=nvidia-nim
+export AI_MODEL=stepfun-ai/step-3.5-flash
+export OPENAI_BASE_URL=https://integrate.api.nvidia.com/v1
+export OPENAI_API_KEY=nvapi-xxx
 
-# Set the API key for your chosen provider
-export OPENAI_API_KEY=sk-xxx
-# or
-export ANTHROPIC_API_KEY=sk-ant-xxx
-# or
-export GOOGLE_GENERATIVE_AI_API_KEY=xxx
-# or
-export DEEPSEEK_API_KEY=xxx
+# Or other providers:
+# export AI_PROVIDER=openai && export AI_MODEL=gpt-4o && export OPENAI_API_KEY=sk-xxx
+# export AI_PROVIDER=anthropic && export ANTHROPIC_API_KEY=sk-ant-xxx
+# export AI_PROVIDER=google && export GOOGLE_GENERATIVE_AI_API_KEY=xxx
+# export AI_PROVIDER=deepseek && export DEEPSEEK_API_KEY=xxx
 
 # (Optional) Google Analytics Measurement ID
 export PUBLIC_GA_ID=G-XXXXXXXXXX
@@ -173,11 +173,17 @@ The daily fetching and generating pipeline runs via GitHub Actions at **08:00 UT
 
 #### Required Secrets
 
-- `AI_PROVIDER` — AI provider name (e.g., `openai`, `anthropic`, `google`, `deepseek`)
-- `AI_MODEL` — Model identifier (e.g., `gpt-4o`)
-- `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` / `GOOGLE_GENERATIVE_AI_API_KEY` / `DEEPSEEK_API_KEY` — API key for your chosen provider
+- `OPENAI_API_KEY` — API key for NVIDIA NIM / OpenAI-compatible endpoint (e.g. `nvapi-xxx`)
 
-#### Optional Secrets
+#### Optional Variables (defaults shown)
+
+- `AI_PROVIDER` — default `nvidia-nim` (`openai` | `anthropic` | `google` | `deepseek` | `nvidia-nim`)
+- `AI_MODEL` — default `stepfun-ai/step-3.5-flash`
+- `OPENAI_BASE_URL` — default `https://integrate.api.nvidia.com/v1`
+
+#### Optional Secrets (other providers / extras)
+
+- `ANTHROPIC_API_KEY` / `GOOGLE_GENERATIVE_AI_API_KEY` / `DEEPSEEK_API_KEY` — if not using NVIDIA NIM
 
 - `PRODUCTHUNT_CLIENT_ID` / `PRODUCTHUNT_CLIENT_SECRET` / `PRODUCTHUNT_API_TOKEN` — Product Hunt API (falls back to RSS if not configured)
 - `WEBHOOK_URL` — Notification webhook endpoint
